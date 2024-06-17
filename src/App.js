@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Lobby from './components/Lobby';
-import CodeBlockPage from './components/CodeBlockPage';  // Correct path assuming both components are in the same folder
+import Lobby from './Lobby';
+import CodeBlockPage from './CodeBlockPage';  // Correct path assuming both components are in the same folder
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
