@@ -6,7 +6,7 @@ function Lobby() {
     const [codeBlocks, setCodeBlocks] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:5000/codeblocks') // Adjust this URL to your server's URL
+        fetch('mentor-app-backend-mentor-app.up.railway.app/codeblocks') // Adjust this URL to your server's URL
             .then(response => response.json())
             .then(data => setCodeBlocks(data))
             .catch(err => console.error("Failed to fetch code blocks:", err));

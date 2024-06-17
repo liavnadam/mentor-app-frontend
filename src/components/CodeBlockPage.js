@@ -5,7 +5,7 @@ import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
 import { CircularProgress, Typography, TextField, Paper, Container, Button } from '@mui/material';
 
-const socket = io('http://localhost:5000');
+const socket = io('mentor-app-backend-mentor-app.up.railway.app');
 
 function CodeBlockPage() {
   const { id } = useParams();
@@ -28,7 +28,7 @@ function CodeBlockPage() {
 
 const fetchRoleAndData = async () => {
     try {
-        const roleResponse = await fetch(`http://localhost:5000/codeblocks/${id}/role`, {
+        const roleResponse = await fetch(`mentor-app-backend-mentor-app.up.railway.app/codeblocks/${id}/role`, {
             headers: { 'Cache-Control': 'no-cache' }
         });
         const roleData = await roleResponse.json();
@@ -36,7 +36,7 @@ const fetchRoleAndData = async () => {
         sessionStorage.setItem(`role_${id}`, roleData.role);
         setRole(roleData.role);
 
-        const codeResponse = await fetch(`http://localhost:5000/codeblocks/${id}`);
+        const codeResponse = await fetch(`mentor-app-backend-mentor-app.up.railway.app/codeblocks/${id}`);
         const codeData = await codeResponse.json();
         setCodeBlock(codeData);
     } catch (err) {
