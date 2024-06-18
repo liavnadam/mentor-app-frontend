@@ -8,36 +8,6 @@ import { styled } from '@mui/system';
 
 const socket = io('https://mentor-app-backend-mentor-app.up.railway.app');
 
-// Create a styled component for a big smiley face
-const SmileyFace = styled('div')({
-  fontSize: '100px',
-  color: '#FFD700', // Gold color for the smiley face
-  textAlign: 'center',
-  margin: '20px auto',
-  animation: 'smileyBounce 1s infinite' // Add a bounce animation
-});
-
-// Define keyframes for bounce animation
-const globalStyles = `
-  @keyframes smileyBounce {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-20px);
-    }
-  }
-
-  body {
-    background-color: #2e3440; /* Dark background for the entire page */
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-  }
-`;
-
-// Apply global styles
-document.head.insertAdjacentHTML('beforeend', `<style>${globalStyles}</style>`);
-
 function CodeBlockPage() {
   const { id } = useParams();
   const [codeBlock, setCodeBlock] = useState({ code: '', title: '', solution: '', instructions: '' });
@@ -45,55 +15,51 @@ function CodeBlockPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [showSolution, setShowSolution] = useState(false); // State to manage solution visibility
 
   const navigate = useNavigate();
 
-  const changeRole = (newRole) => {
-    sessionStorage.setItem(`role_${id}`, newRole);
-    setRole(newRole);
-    navigate(0); // Reload the page to reflect the role change
+  const changeRole = async (newRole) => {
+    try {
+      const response = await fetch(`https://mentor-app-backend-mentor-app.up.railway.app/codeblocks/${id}/role?role=${newRole}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setRole(data.role);
+      navigate(0); // Reload the page to reflect the role change
+    } catch (error) {
+      console.error('Failed to switch role:', error);
+      setError(error.message);
+    }
   };
 
   useEffect(() => {
-    const fetchRoleAndData = async () => {
-      let currentRole = sessionStorage.getItem(`role_${id}`) || 'mentor'; // Default to mentor
-
+    const fetchCodeBlockData = async () => {
       try {
-        const roleResponse = await fetch(`https://mentor-app-backend-mentor-app.up.railway.app/codeblocks/${id}/role?role=${currentRole}`, {
-          credentials: 'include',
+        const response = await fetch(`https://mentor-app-backend-mentor-app.up.railway.app/codeblocks/${id}`, {
           headers: {
             'Content-Type': 'application/json',
           },
         });
-        if (!roleResponse.ok) {
-          throw new Error(`Role fetch failed with status: ${roleResponse.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
-        const roleData = await roleResponse.json();
-        setRole(roleData.role);
-
-        // Fetch code block data
-        const codeResponse = await fetch(`https://mentor-app-backend-mentor-app.up.railway.app/codeblocks/${id}`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!codeResponse.ok) {
-          throw new Error(`Code block fetch failed with status: ${codeResponse.status}`);
-        }
-
-        const codeData = await codeResponse.json();
-        setCodeBlock(codeData);
+        const data = await response.json();
+        setCodeBlock(data);
       } catch (err) {
-        console.error('Error fetching data:', err.message);
+        console.error('Error fetching code block data:', err);
         setError(`Failed to load data: ${err.message}`);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchRoleAndData();
+    fetchCodeBlockData();
   }, [id]);
 
   useEffect(() => {
@@ -115,14 +81,6 @@ function CodeBlockPage() {
 
   const checkSolution = () => {
     setIsCorrect(codeBlock.code.trim() === codeBlock.solution.trim());
-  };
-
-  const handleShowSolution = () => {
-    setShowSolution(true);
-  };
-
-  const handleCloseSolution = () => {
-    setShowSolution(false);
   };
 
   if (isLoading) {
@@ -230,18 +188,6 @@ function CodeBlockPage() {
               >
                 Check
               </Button>
-              <Button
-                onClick={handleShowSolution}
-                sx={{
-                  mt: 2,
-                  ml: 2,
-                  backgroundColor: '#f25c54',
-                  '&:hover': { backgroundColor: '#f75e57' },
-                }}
-                variant="contained"
-              >
-                Show Solution
-              </Button>
               {isCorrect !== null && (
                 <Typography sx={{ mt: 2 }} color={isCorrect ? "success.main" : "error.main"}>
                   {isCorrect ? "Correct!" : "Incorrect, please try again."}
@@ -249,57 +195,6 @@ function CodeBlockPage() {
               )}
             </>
           )}
-          {isCorrect && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <SmileyFace>😊</SmileyFace>
-            </Box>
-          )}
-          <Typography
-            component="pre"
-            variant="body2"
-            sx={{
-              mt: 2,
-              p: 1,
-              backgroundColor: '#4c566a',
-              borderRadius: 1,
-              overflowX: 'auto',
-              color: '#eceff4',
-            }}
-          >
-            <code dangerouslySetInnerHTML={{ __html: hljs.highlight(codeBlock.code, { language: 'javascript' }).value }} />
-          </Typography>
-          <Modal
-            open={showSolution}
-            onClose={handleCloseSolution}
-            closeAfterTransition
-            BackdropComponent={Backdrop}
-            BackdropProps={{
-              timeout: 500,
-            }}
-          >
-            <Fade in={showSolution}>
-              <Box sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 400,
-                bgcolor: '#3b4252',
-                color: '#eceff4',
-                border: '2px solid #ffd166',
-                boxShadow: 24,
-                p: 4,
-                borderRadius: '10px',
-              }}>
-                <Typography variant="h6" component="h2">
-                  Solution
-                </Typography>
-                <Typography sx={{ mt: 2, color: '#d8dee9' }}>
-                  {codeBlock.solution}
-                </Typography>
-              </Box>
-            </Fade>
-          </Modal>
         </Paper>
       </Container>
     </Box>
