@@ -6,7 +6,7 @@ import 'highlight.js/styles/github.css';
 import { CircularProgress, Typography, TextField, Paper, Container, Button, Box, Modal, Backdrop, Fade } from '@mui/material';
 import { styled } from '@mui/system';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://mentor-app-backend-mentor-app.up.railway.app');
 
 // Create a styled component for a big smiley face
 const SmileyFace = styled('div')({
@@ -60,7 +60,7 @@ function CodeBlockPage() {
       let currentRole = sessionStorage.getItem(`role_${id}`) || 'mentor'; // Default to mentor
 
       try {
-        const roleResponse = await fetch(`http://localhost:5000/codeblocks/${id}/role?role=${currentRole}`, {
+        const roleResponse = await fetch(`http://mentor-app-backend-mentor-app.up.railway.app/codeblocks/${id}/role?role=${currentRole}`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ function CodeBlockPage() {
         setRole(roleData.role);
 
         // Fetch code block data
-        const codeResponse = await fetch(`http://localhost:5000/codeblocks/${id}`, {
+        const codeResponse = await fetch(`http://mentor-app-backend-mentor-app.up.railway.app/codeblocks/${id}`, {
           headers: {
             'Content-Type': 'application/json',
           },
